@@ -4,7 +4,7 @@
   "description": "Starter kit for React and Redux Pluralsight course by Emmanuel Isaac",
   "scripts": {
     "prestart": "babel-node tools/startMessage.js",
-    "start": "npm-run-all --parallel open:src lint:watch test:watch",
+    "start": "npm-run-all --parallel open:src lint:watch test:watch -s",
     "open:src": "babel-node tools/srcServer.js",
     "lint": "esw webpack.config.* src tools",
     "lint:watch": "npm run lint -- --watch",
