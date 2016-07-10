@@ -3,8 +3,7 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as courseActions from '../../actions/courseActions';
 import CourseForm from './CourseForm';
-import courseApi from '../../api/mockCourseApi';
-
+import toastr from 'toastr';
 
 class ManageCoursePage extends React.Component {
   constructor(props, context) {
@@ -12,11 +11,13 @@ class ManageCoursePage extends React.Component {
 
     this.state = {
       course: Object.assign({}, props.course),
-      errors: {}
+      errors: {},
+      saving: false
     };
 
     this.updateCourseState = this.updateCourseState.bind(this);
     this.saveCourse = this.saveCourse.bind(this);
+    this.redirect = this.redirect.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -35,8 +36,19 @@ class ManageCoursePage extends React.Component {
 
   saveCourse(event) {
     event.preventDefault();
-    this.props.actions.saveCourse(this.state.course);
-    this.context.router.push("/courses");
+    this.setState({ saving: true });
+    this.props.actions.saveCourse(this.state.course)
+      .then(() => this.redirect())
+      .catch(error => {
+        toastr.error(error);
+        this.setState({ saving: false });
+      });
+  }
+
+  redirect() {
+    this.setState({ saving: false });
+    toastr.success('Course Saved!');
+    return this.context.router.push("/courses");
   }
 
   render() {
@@ -47,6 +59,7 @@ class ManageCoursePage extends React.Component {
         errors={this.state.errors}
         onChange={this.updateCourseState}
         onSave={this.saveCourse}
+        saving={this.state.saving}
       />
     );
   }
@@ -72,7 +85,7 @@ function getCourseById(courses, courseId) {
 
 function mapStateToProps(state, ownProps) {
   const courseId = ownProps.params.id;
-  let course = {id: '', watchHref: '', category: '', authorId: '', length: ''};
+  let course = {id: '', title: '', watchHref: '', category: '', authorId: '', length: ''};
   if (courseId && state.courses.length > 0) {
     course = getCourseById(state.courses, courseId);
   }
